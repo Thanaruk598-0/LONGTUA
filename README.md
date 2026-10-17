@@ -60,9 +60,3 @@ Follow the Expo CLI instructions to open the app on a development device.
 ## Environment Files
 
 Never commit real `.env` files, database credentials, tokens, or private keys. Use `.env.example` files as templates only.
-
-## Development Status
-
-- Phase 1: Project Foundation
-- Phase 2: Database and Authentication
-- Phase 3 onward: Implementation assisted by Codex, following the project documentation
