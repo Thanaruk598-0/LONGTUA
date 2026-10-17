@@ -1,0 +1,22 @@
+name: longtua
+services:
+  postgres:
+    image: postgres:17
+    container_name: longtua-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: longtua
+      POSTGRES_USER: longtua
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in infra/.env}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - longtua_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U longtua -d longtua"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  longtua_postgres_data:
