@@ -120,3 +120,47 @@ def test_login_wrong_password_returns_401(client):
 
     assert response.status_code == 401
     assert response.json()["detail"] == "Invalid email or password"
+
+
+def test_me_returns_current_user(client):
+    email = f"{uuid.uuid4().hex}@example.com"
+    password = "SecurePass123!"
+
+    register_response = client.post(
+        "/api/auth/register",
+        json={"email": email, "password": password},
+    )
+    assert register_response.status_code == 201
+
+    login_response = client.post(
+        "/api/auth/login",
+        json={"email": email, "password": password},
+    )
+    assert login_response.status_code == 200
+
+    token = login_response.json()["access_token"]
+
+    response = client.get(
+        "/api/auth/me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["id"] == register_response.json()["id"]
+    assert response.json()["email"] == email
+    assert "password_hash" not in response.json()
+
+
+def test_me_without_token_returns_401(client):
+    response = client.get("/api/auth/me")
+
+    assert response.status_code == 401
+
+
+def test_me_with_invalid_token_returns_401(client):
+    response = client.get(
+        "/api/auth/me",
+        headers={"Authorization": "Bearer invalid.token.value"},
+    )
+
+    assert response.status_code == 401

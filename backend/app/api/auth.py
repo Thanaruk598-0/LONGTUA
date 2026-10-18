@@ -10,6 +10,10 @@ from app.schemas.auth import LoginRequest, TokenResponse
 from app.services.auth import authenticate_user
 from app.services.security import create_access_token
 
+from app.models.user import User
+
+from app.api.deps import get_current_user
+
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 
@@ -65,3 +69,12 @@ def login(
         access_token=access_token,
         expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )
+
+@router.get(
+    "/me",
+    response_model=UserResponse,
+)
+def get_me(
+    current_user: User = Depends(get_current_user),
+) -> UserResponse:
+    return UserResponse.model_validate(current_user)
