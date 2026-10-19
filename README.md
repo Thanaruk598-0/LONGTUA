@@ -1,4 +1,4 @@
-﻿# LONGTUA — Personal Adaptive Planner
+# LONGTUA — Personal Adaptive Planner
 
 ## Technology Stack
 
@@ -48,6 +48,15 @@ Backend URLs:
 - Health: http://127.0.0.1:8000/api/health
 - API documentation: http://127.0.0.1:8000/docs
 
+To apply database migrations manually:
+
+    cd backend
+    .\.venv\Scripts\Activate.ps1
+    alembic upgrade head
+
+For tests, use `backend/.env.test.example` as the template. The CI workflow
+provisions its own PostgreSQL service and runs migrations before pytest.
+
 ## Mobile Development
 
 From the project root, run:
@@ -59,4 +68,6 @@ Follow the Expo CLI instructions to open the app on a development device.
 
 ## Environment Files
 
-Never commit real `.env` files, database credentials, tokens, or private keys. Use `.env.example` files as templates only.
+Development, test, and infrastructure environments use separate environment
+templates. Never commit real `.env` files, database credentials, tokens, or
+private keys. Use `.env.example` files as templates only.

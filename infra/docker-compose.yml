@@ -18,5 +18,21 @@ services:
       timeout: 5s
       retries: 10
 
+  backend:
+    build:
+      context: ../backend
+    environment:
+      APP_NAME: LONGTUA
+      APP_ENV: development
+      DATABASE_URL: postgresql+psycopg://longtua:${POSTGRES_PASSWORD}@postgres:5432/longtua
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in infra/.env}
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 15
+      REFRESH_TOKEN_EXPIRE_DAYS: 30
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
 volumes:
   longtua_postgres_data:
