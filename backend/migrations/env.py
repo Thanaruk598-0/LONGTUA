@@ -7,7 +7,18 @@ from sqlalchemy import engine_from_config, pool
 from app.core.config import settings
 from app.db.session import Base
 
-from app.models import User
+from app.models import (
+    AuthSession,
+    AuthToken,
+    PlanningObject,
+    PlanningRequest,
+    Proposal,
+    ProposalItem,
+    ScheduleItem,
+    ScheduleVersion,
+    User,
+    UserSettings,
+)
 
 # Import models here so Alembic can detect them.
 # Additional model imports will be added as models are implemented.
