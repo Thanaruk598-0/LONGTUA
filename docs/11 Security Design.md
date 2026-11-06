@@ -331,6 +331,9 @@ Authentication Failure
 
 โดยไม่จำเป็น
 
+บัญชีที่มีสถานะไม่ใช่ `ACTIVE` ต้องไม่สามารถ Login ได้ และต้องใช้
+Canonical Authentication Error โดยไม่เปิดเผยข้อมูลเกินจำเป็น
+
 ---
 
 # 11.11 Account Status
@@ -354,9 +357,9 @@ LOCKED
 
 ---
 
-# 11.12 Email Verification
+# 11.12 Deferred Email Verification
 
-Email Verification Token:
+Email verification is deferred from the current planning-focused scope.
 
 * One-Time
 * มี Expiration
@@ -387,9 +390,9 @@ Mark Email Verified
 
 ---
 
-# 11.13 Password Reset
+# 11.13 Deferred Password Reset
 
-Password Reset Token:
+Password reset through transactional email is deferred from the current scope.
 
 * One-Time
 * มี Expiration
@@ -496,7 +499,17 @@ Remember Me ON
 
 เป็น Refresh Session Lifetime
 
-ทั้งสองกรณีต้องอยู่ภายใต้ Absolute Session Lifetime
+สำหรับ MVP ค่า `expires_at` และ `absolute_expires_at` ใช้เพดานเดียวกัน:
+
+```text
+Remember Me OFF
+→ 7 days
+
+Remember Me ON
+→ 30 days
+```
+
+Refresh ต่อเนื่องไม่สามารถยืดอายุเกิน `absolute_expires_at` ได้
 
 ---
 
@@ -546,6 +559,9 @@ Client
 Backend
 → revoke refresh session
 ```
+
+Refresh Token ถูกส่งผ่าน Response Body และต้องถูกจัดเก็บฝั่ง Mobile ด้วย
+`expo-secure-store` เท่านั้นตาม Mobile Security Boundary
 
 หากมี Device Session State ที่เกี่ยวข้องต้องถูก Clear / Revoke ตาม Policy
 
@@ -1965,20 +1981,19 @@ Credential Protection
 
 ```text id="2d1xqr"
 /login
-/forgot-password
-/reset-password
+/refresh
 ```
 
 เพื่อลด Abuse
 
 ---
 
-# 11.88 Password Reset Enumeration Protection
+# 11.88 Deferred Password Reset Enumeration Protection
 
-สำหรับ:
+สำหรับการออกแบบในอนาคต:
 
 ```text id="t0fl4x"
-POST /api/auth/forgot-password
+POST /api/auth/forgot-password (deferred)
 ```
 
 Response ควรหลีกเลี่ยงการเปิดเผยว่า Email มี Account อยู่จริงหรือไม่
@@ -1989,7 +2004,7 @@ Response ควรหลีกเลี่ยงการเปิดเผย�
 
 ---
 
-# 11.89 Email Verification Enumeration
+# 11.89 Deferred Email Verification Enumeration
 
 ระบบควรจำกัดข้อมูลที่เปิดเผยจาก Verification Endpoint
 

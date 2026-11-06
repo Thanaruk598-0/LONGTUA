@@ -1339,6 +1339,7 @@ UNAUTHORIZED
 SESSION_EXPIRED
 INVALID_TOKEN
 TOKEN_REVOKED
+EMAIL_NOT_VERIFIED
 ```
 
 ## Authorization
@@ -1703,10 +1704,77 @@ POST /api/auth/login
 POST /api/auth/refresh
 POST /api/auth/logout
 GET  /api/auth/me
-POST /api/auth/verify-email
-POST /api/auth/forgot-password
-POST /api/auth/reset-password
 ```
+
+### Authentication Data and Delivery Contract
+
+Register Request:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "password",
+  "displayName": "User",
+  "timezone": "Asia/Bangkok"
+}
+```
+
+`displayName` เป็น optional หากไม่ส่งให้ใช้ค่า `email` เป็นชื่อแสดงผลเริ่มต้น
+และ `timezone` เป็น required IANA Time Zone Identifier
+
+Register และ `/api/auth/me` Response ใช้รูปแบบ:
+
+```json
+{
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "displayName": "User",
+    "timezone": "Asia/Bangkok",
+    "emailVerified": false
+  }
+}
+```
+
+Login Response ใช้รูปแบบ:
+
+```json
+{
+  "accessToken": "jwt",
+  "refreshToken": "refresh-token",
+  "expiresIn": 900,
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "displayName": "User",
+    "timezone": "Asia/Bangkok",
+    "emailVerified": true
+  }
+}
+```
+
+Refresh และ Logout รับ Refresh Token ใน Request Body:
+
+```json
+{
+  "refreshToken": "refresh-token"
+}
+```
+
+Refresh Token ต้องถูก Rotate เมื่อ Refresh สำเร็จ และ Token เดิมใช้ซ้ำไม่ได้
+ระบบต้องปฏิเสธ Login ของบัญชีที่มีสถานะไม่ใช่ `ACTIVE`
+
+โดย credentials และ sender configuration ต้องมาจาก Environment หรือ Secret Manager
+เท่านั้น
+
+Remember Me Policy:
+
+```text
+Remember Me OFF → 7 days
+Remember Me ON  → 30 days
+```
+
+`absolute_expires_at` ใช้เพดานเดียวกับอายุ Session ตาม Remember Me
 
 ## Activities
 

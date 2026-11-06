@@ -360,9 +360,15 @@ SERVICE_UNAVAILABLE
 {
   "email": "user@example.com",
   "password": "password",
-  "displayName": "User"
+  "displayName": "User",
+  "timezone": "Asia/Bangkok"
 }
 ```
+
+`displayName` เป็น optional หากไม่ส่ง ระบบต้องใช้ค่า `email` เป็นชื่อแสดงผล
+เริ่มต้น และต้องไม่ทำให้การสร้างบัญชีล้มเหลวเพียงเพราะไม่มีชื่อแสดงผล
+
+`timezone` เป็น required และต้องเป็น IANA Time Zone Identifier
 
 ### Response
 
@@ -378,6 +384,7 @@ Conceptual Response:
     "id": "uuid",
     "email": "user@example.com",
     "displayName": "User",
+    "timezone": "Asia/Bangkok",
     "emailVerified": false
   }
 }
@@ -412,16 +419,23 @@ Conceptual:
 ```json id="qac926"
 {
   "accessToken": "jwt",
+  "refreshToken": "refresh-token",
   "expiresIn": 900,
   "user": {
     "id": "uuid",
     "email": "user@example.com",
-    "displayName": "User"
+    "displayName": "User",
+    "timezone": "Asia/Bangkok",
+    "emailVerified": true
   }
 }
 ```
 
-Refresh Session ต้องถูกจัดการอย่างปลอดภัยตาม Client/Server Authentication Design
+ระบบต้องปฏิเสธ Login ของบัญชีที่ยังไม่ผ่าน Email Verification
+ด้วย Authentication Error ที่เป็น canonical code
+
+Refresh Token ต้องส่งกลับใน Response Body เพื่อให้ Mobile จัดเก็บด้วย
+`expo-secure-store` และห้ามส่งหรือเก็บแบบ Plain Text ใน Database
 
 ---
 
@@ -431,7 +445,13 @@ Refresh Session ต้องถูกจัดการอย่างปลอ�
 
 ### Request
 
-ขึ้นอยู่กับ Refresh Token/session delivery mechanism ของ Implementation
+Refresh Token ส่งใน Request Body:
+
+```json
+{
+  "refreshToken": "refresh-token"
+}
+```
 
 ### Response
 
@@ -439,7 +459,9 @@ Refresh Session ต้องถูกจัดการอย่างปลอ�
 200 OK
 ```
 
-คืน Access Token ใหม่
+คืน Access Token และ Refresh Token ใหม่ใน Response Body
+
+Refresh Token ต้องถูก Rotate ทุกครั้งที่ Refresh สำเร็จ และ Token เดิมต้องใช้ซ้ำไม่ได้
 
 หาก Session:
 
@@ -462,10 +484,12 @@ Logout
 ### Request
 
 ```text id="q5j8aj"
-Idempotency-Key
+{
+  "refreshToken": "refresh-token"
+}
 ```
 
-เมื่อจำเป็น
+Refresh Token ส่งใน Request Body
 
 ### Behavior
 
@@ -502,61 +526,7 @@ User ID มาจาก Auth Context
 
 ---
 
-# 10.19 POST /api/auth/verify-email
-
-ใช้ Email Verification Token
-
-ตัวอย่าง:
-
-```json id="fuif2a"
-{
-  "token": "one-time-token"
-}
-```
-
-หากสำเร็จ:
-
-```text id="nrncnv"
-200 OK
-```
-
-Token ต้องใช้ได้เพียงครั้งเดียวและมี Expiration
-
----
-
-# 10.20 POST /api/auth/forgot-password
-
-Request Password Reset
-
-```json id="m7hbdg"
-{
-  "email": "user@example.com"
-}
-```
-
-ระบบควรระวัง User Enumeration และสามารถตอบด้วยข้อความเชิง Generic
-
----
-
-# 10.21 POST /api/auth/reset-password
-
-ตั้ง Password ใหม่
-
-```json id="6b3n2t"
-{
-  "token": "one-time-token",
-  "newPassword": "new-password"
-}
-```
-
-เมื่อสำเร็จ:
-
-* Password ถูกเปลี่ยน
-* Existing Refresh Sessions ถูก Revoke ตาม Policy
-
----
-
-# 10.22 Activity Endpoints
+# 10.19 Activity Endpoints
 
 ```text id="kg5gka"
 GET    /api/activities
@@ -2985,9 +2955,6 @@ POST   /api/auth/login
 POST   /api/auth/refresh
 POST   /api/auth/logout
 GET    /api/auth/me
-POST   /api/auth/verify-email
-POST   /api/auth/forgot-password
-POST   /api/auth/reset-password
 ```
 
 ## ACTIVITIES

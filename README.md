@@ -62,9 +62,12 @@ provisions its own PostgreSQL service and runs migrations before pytest.
 From the project root, run:
 
     cd mobile
+    $env:EXPO_PUBLIC_API_BASE_URL="http://<YOUR-LAN-IP>:8000/api"
     npx expo start
 
-Follow the Expo CLI instructions to open the app on a development device.
+Use the backend machine's LAN IP, not `127.0.0.1`, when opening the app in
+Expo Go on an iPhone. The iPhone and backend machine must be on the same Wi-Fi
+network, and the backend port must be reachable from that network.
 
 ## Environment Files
 

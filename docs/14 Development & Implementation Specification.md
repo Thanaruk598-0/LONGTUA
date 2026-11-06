@@ -1289,9 +1289,20 @@ AI_MODEL
 AI_API_KEY
 CORS_ORIGINS
 ENVIRONMENT
+JWT_SECRET_KEY
 ```
 
 Secrets ต้องอยู่ใน environment / secret manager ที่เหมาะสม และไม่มี secret ใน Git
+
+Phase 2 Authentication Policy:
+
+* Register ต้องรับ `timezone` เป็น IANA Time Zone Identifier
+* `displayName` เป็น optional
+* หากไม่ส่ง `displayName` ให้ใช้ค่า `email` เป็นชื่อแสดงผลเริ่มต้น
+* Refresh Token ส่งผ่าน Response Body
+* Remember Me OFF มีอายุ Session สูงสุด 7 วัน
+* Remember Me ON มีอายุ Session สูงสุด 30 วัน
+* `absolute_expires_at` ใช้เพดานเดียวกับอายุ Session ตาม Remember Me
 
 ---
 
@@ -1578,10 +1589,19 @@ Implement:
 * login
 * refresh
 * logout
-* email verification
-* password reset
 * password security
 * ownership middleware
+* refresh token rotation
+* canonical authentication error responses
+
+Phase 2 Contract:
+
+* Authentication endpoints ใช้ Base Path `/api`
+* Register และ `/api/auth/me` ใช้ response wrapper `{ "user": { ... } }`
+* Login ใช้ response ที่มี `accessToken`, `refreshToken`, `expiresIn` และ `user`
+* Refresh รับ `refreshToken` ใน Request Body และคืน Token ชุดใหม่
+* Refresh Token ต้องเก็บแบบ Hash
+* User-owned resources ต้อง derive ownership จาก Auth Context ไม่รับ `userId` จาก Client
 
 Definition of Done:
 
