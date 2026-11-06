@@ -1,6 +1,8 @@
 ﻿from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
 from datetime import datetime, timedelta, timezone
+import hashlib
+import secrets
 
 import jwt
 
@@ -38,3 +40,11 @@ def create_access_token(subject: str) -> str:
         settings.JWT_SECRET_KEY,
         algorithm=settings.JWT_ALGORITHM,
     )
+
+
+def create_random_token() -> str:
+    return secrets.token_urlsafe(32)
+
+
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()

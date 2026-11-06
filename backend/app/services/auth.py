@@ -1,5 +1,6 @@
 ﻿from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from zoneinfo import available_timezones
 
 from app.models.user import User
 from app.services.security import hash_password
@@ -10,12 +11,19 @@ def register_user(
     db: Session,
     email: str,
     password: str,
+    display_name: str | None,
+    timezone: str,
 ) -> User:
     normalized_email = email.strip().lower()
+    if timezone not in available_timezones():
+        raise ValueError("Invalid timezone")
 
     user = User(
         email=normalized_email,
         password_hash=hash_password(password),
+        display_name=display_name or normalized_email,
+        timezone=timezone,
+        email_verified_at=None,
     )
 
     db.add(user)
